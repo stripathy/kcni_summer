@@ -2,9 +2,16 @@
 
 library(tidyverse)
 library(devtools)
-devtools::install_github('oganm/ogbox')
-library(ogbox)
 library(ggplot2)
+
+install.packages("matrixStats")
+library(matrixStats)
+
+install.packages("BiocManager")
+library(BiocManager)
+BiocManager::install("GEOquery")
+library("GEOquery")
+
 
 labonte_expr = read.csv(file = '~/Downloads/GSE102556_HumanMDD_fpkmtab.txt', sep = '\t')
 
@@ -14,14 +21,6 @@ labonte_meta = softParser(soft_file)
 
 labonte_meta_pfc = labonte_meta %>% filter(`!Sample_characteristics_ch1 = tissue` == 'Dorsolateral prefrontal cortex (dlPFC; BA8/9)')
 
-source("http://bioconductor.org/biocManager")
-biocLite("GEOquery")
-
-install.packages("BiocManager")
-library(BiocManager)
-BiocManager::install("GEOquery")
-
-library("GEOquery")
 
 gse=getGEO(filename="~/Downloads/GSE102556-GPL11154_series_matrix.txt")
 gse_df = gse %>% as.data.frame()
@@ -48,22 +47,16 @@ gse_df = gse_df %>%
 gse_df = gse_df %>% mutate(age.ch1 = as.numeric(age.ch1))
 gse_df = gse_df %>% mutate(expr_names = paste0('X', sample_nums, '.', short_region_names))
 
-dlpfc_samples = gse_df %>% filter(short_region_names == 'BA8_9') %>% pull(expr_names)
+labonte_meta = gse_df%>% filter(short_region_names == 'BA8_9')
 
+dlpfc_samples = gse_df %>% filter(short_region_names == 'BA8_9') %>% pull(expr_names)
 
 dlpfc_expr = labonte_expr[c('gene_name', dlpfc_samples)]
 
-use_gene_list = c('SST', 'SLC17A7', 'XIST', 'PVALB', 'TAC1', 'MOG', 'GAD1', 'ELFN1')
-gene_mat = dlpfc_expr[dlpfc_expr$gene_name %in% use_gene_list, ]
-gene_names = gene_mat$gene_name
-gene_mat_trans = gene_mat[-1] %>% t() %>% as.data.frame()
-colnames(gene_mat_trans) = gene_names
+labonte_dlpfc_expr = dlpfc_expr
 
-gene_mat_trans = gene_mat_trans %>% tibble::rownames_to_column(var = 'expr_names')
+write.csv(labonte_meta, file = 'data/labonte_dlpfc_meta.csv')
+write.csv(labonte_dlpfc_expr, file = 'data/labonte_dlpfc_expr.csv')
 
-gene_mat_comb = merge(gse_df, gene_mat_trans, by = 'expr_names')
 
-gene_mat_comb %>% ggplot(aes(x = age.ch1, y = ELFN1, color = phenotype.ch1)) + geom_point()
 
-formula = 'SST ~ phenotype.ch1 + age.ch1 + 1 + gender.ch1'
-summary(lm(formula, data = gene_mat_comb, na.action = na.omit))

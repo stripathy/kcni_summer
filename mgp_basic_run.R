@@ -1,4 +1,4 @@
-
+library(here)
 library(tidyverse)
 library(ggplot2)
 
@@ -7,16 +7,16 @@ library(cowplot)
 
 theme_set(theme_cowplot())
 
-# read expression meta and expr
-labonte_meta = read.csv(file = 'data/labonte_dlpfc_meta.csv')
-labonte_expr = read.csv(file = 'data/labonte_dlpfc_expr.csv')
-labonte_expr = labonte_expr[-1]
-
 #devtools::install_github('oganm/markerGeneProfile', force = T)
 library(markerGeneProfile)
 
+# read expression meta and expr
+labonte_meta = read.csv(file = here('data','labonte_dlpfc_meta.csv'))
+labonte_expr = read.csv(file = here('data','labonte_dlpfc_expr.csv'))
+labonte_expr = labonte_expr[-1]
+
 # read marker genes
-acc_markers = read_csv('marker_genes/ACC_results.csv')
+acc_markers = read_csv(here('marker_genes','ACC_results.csv'))
 cell_types = acc_markers$adapted_cluster_name %>% unique()
 
 marker_list = lapply(cell_types, function(cell_type){

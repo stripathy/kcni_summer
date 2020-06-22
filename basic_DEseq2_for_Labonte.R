@@ -1,6 +1,8 @@
 library(here)
 library(tidyverse)
 library(ggplot2)
+library(reshape2)
+library(magrittr)
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
@@ -29,16 +31,28 @@ dds <- DESeqDataSetFromMatrix(countData = labonte_expr,
                               colData = labonte_meta,
                               design= ~ gender + phenotype + ph + rin + pmi + age)
 
+dds <- DESeqDataSetFromMatrix(countData = labonte_expr,
+                              colData = labonte_meta,
+                              design= ~ gender + phenotype +  rin + age)
+
 #prefilter data
-keep <- rowSums(counts(dds)) >= 10
+keep <- rowSums(counts(dds)) >= 50
 print(paste("Keeping", sum(keep), "of", nrow(labonte_expr), "genes"))
 dds <- dds[keep,]
 
 #compute differential expression - may be slow
 dds <- DESeq(dds)
-resultsNames(dds) # lists the coefficients
+
+resultsNames(dds) # lists the coefficients / contrasts
+
 #get the result for case/control status
 res <- results(dds, name="phenotype_MDD_vs_CTRL")
+res %<>% as_tibble(rownames = "gene_symbol")
+#print results ordered by p-value
+res %>% arrange(pvalue) 
+
+#get the result for case/control status
+res <- results(dds, name="age")
 res %<>% as_tibble(rownames = "gene_symbol")
 #print results ordered by p-value
 res %>% arrange(pvalue)

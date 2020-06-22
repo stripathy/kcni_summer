@@ -103,6 +103,10 @@ plot_grid(mog_mrna_vs_age_fig, oligo_prop_vs_age_fig, nrow = 1)
 labonte_meta_plus_mgps = merge(labonte_meta, mgp_df)
 
 # fit a linear model per cell type proportion against all covariates used in DESeq2 modelling
+
+# model form is 
+# cell_type_prop ~ gender + ph + rin + pmi + age + phenotype
+
 mod_df_list = lapply(cell_types, function(cell_type_name){
   curr_formula = paste0('scale(', cell_type_name, ') ~ gender + scale(ph) + scale(rin) + scale(pmi) + scale(age) + phenotype')
   curr_mod = lm(curr_formula, data = labonte_meta_plus_mgps)

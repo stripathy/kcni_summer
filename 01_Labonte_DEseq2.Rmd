@@ -32,7 +32,6 @@ Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by press
 ```{r}
 library(here)
 library(tidyverse) # tidyverse contrains many things - including ggplot2
-library(reshape2)
 library(magrittr)
 
 library(DESeq2) # from BiocManager
@@ -220,15 +219,31 @@ correlate risk score with expression of each gene
 #### Read in the day one results and merge with our gene expression data
 
 ```{r}
+colnames(labonte_expr)
+```
+
+
+```{r}
+## reading in the risk scores from day 1 of the Summer School
 risk_scores <- read_csv(here("data", "day1_PRS", "risk_scores.csv"))
-labonte_meta <- inner_join(labonte_meta, risk_scores)
+
+## joining the risk scores to the donor meta data
+labonte_meta_plus_risk <- inner_join(labonte_meta, risk_scores, 
+                                     by = "geo_accession")
+
+## because this could have re-ordered the columns again - we are repeating the steps from above to force the column order back..
+labonte_meta_plus_risk %<>% 
+  mutate(geo_accession = factor(geo_accession, 
+                                levels = colnames(labonte_expr))) %>%
+  arrange(geo_accession)
+  
 ```
 
 ### add in a term for day one PRS to the design
 
 ```{r}
-dds <- DESeqDataSetFromMatrix(countData = labonte_expr,
-                              colData = labonte_meta,
+dds_PRS <- DESeqDataSetFromMatrix(countData = labonte_expr,
+                              colData = labonte_meta_plus_risk,
                               design= ~ gender + phenotype + ph + rin + pmi + age + day1_PRS)
 ```
 
@@ -236,10 +251,14 @@ dds <- DESeqDataSetFromMatrix(countData = labonte_expr,
 ### prefilter as before
 
 ```{r}
-dds <- dds[keep,]
+#prefilter data
+keep <- rowSums(counts(dds_PRS)) >= 50
+print(paste("Keeping", sum(keep), "of", nrow(labonte_expr), "genes"))
 
-dds <- DESeq(dds)
-res <- results(dds, name="day1_PRS")
+dds_PRS <- dds_PRS[keep,]
+
+dds_PRS_res <- DESeq(dds_PRS)
+res <- results(dds_PRS_res, name="day1_PRS")
 res %<>% as_tibble(rownames = "gene_symbol")
 res %>% arrange(pvalue)
 ```

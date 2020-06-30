@@ -8,7 +8,7 @@ output:
 
 # Running Differential Expression Analyses using RNA-seq data
 
-### Precuser
+### Precursor
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
@@ -141,7 +141,6 @@ resultsNames(dds)
 ### get the result for case/control status
 
 ```{r}
-#get the result for case/control status
 res <- results(dds, name="phenotype_MDD_vs_CTRL")
 res %<>% as_tibble(rownames = "gene_symbol")
 
@@ -149,7 +148,7 @@ res %<>% as_tibble(rownames = "gene_symbol")
 res %>% arrange(pvalue)
 ```
 
-### get the result age
+### Get the results for age associations
 
 ```{r}
 #get the result for age
@@ -187,28 +186,25 @@ melted_expression <- labonte_expr %>%
 ### select our gene of interest
 
 ```{r}
-expression_RPL23AP4 <- melted_expression %>%
-  filter(gene_symbol == "RPL23AP4")
+expression_single_gene <- melted_expression %>%
+  filter(gene_symbol == "MTCO3P13")
 ```
 
 ### merge the metadata for this gene
 
 ```{r}
 #merge metadata
-expression_RPL23AP4 <- inner_join(expression_RPL23AP4, labonte_meta)
-expression_RPL23AP4 %>% arrange(-count) #lots of zeroes
+expression_single_gene <- inner_join(expression_single_gene, labonte_meta)
+expression_single_gene %>% arrange(-count) #lots of zeroes
 ```
 
 ```{r}
-expression_RPL23AP4 %>% 
+expression_single_gene %>% 
   group_by(phenotype) %>% 
-  summarize(mean_count = mean(count), 
+  summarize(mean_count = mean(count), median_count = median(count),
             max_count = max(count))
 ```
 
-## Optional Exercise
-
-Think of and apply more stringent prefiltering
 
 ---------------------------------------------------------------
 
@@ -263,7 +259,11 @@ res %<>% as_tibble(rownames = "gene_symbol")
 res %>% arrange(pvalue)
 ```
 
-### SST is of interest lets look at this gene in depth
+### SST is of interest lets look at this gene in depth in future analyses
 
 
+## Optional Exercises
 
+* Think of and apply more stringent prefiltering
+* Test and remove outliers
+* Plot top genes

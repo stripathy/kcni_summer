@@ -113,10 +113,6 @@ colnames(gene_mat_trans) = gene_names
 ```
 
 ```{r}
-# remove genes with low standard deviations
-# gene_sds = rowSds(gene_mat[-1] %>% as.matrix())
-# names(gene_sds) = gene_names
-# gene_mat = gene_mat[gene_sds > .1, ]
 gene_mat_trans <- gene_mat_trans %>% 
   tibble::rownames_to_column(var = 'geo_accession')
 

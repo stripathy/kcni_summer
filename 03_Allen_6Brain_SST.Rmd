@@ -1,0 +1,87 @@
+library(here)
+library(tidyverse)
+library(markerGeneProfile)
+
+# Estimating inhibitory SST neuron proportions across the adult cerebral cortex using the Allen Human Brain Atlas using the aparc Freesurfer space (Desikan–Killiany cortical atlas)
+
+### Read and process the marker genes as before
+
+```{r}
+# read marker genes
+acc_markers = read_csv(here('marker_genes','ACC_results.csv'))
+
+cell_types = acc_markers$cluster %>% unique()
+```
+
+```{r}
+marker_list <- lapply(cell_types, function(cell_type){
+  print(cell_type)
+  return(acc_markers %>% filter(cluster == cell_type) %>% pull(gene) %>% unlist())
+})
+names(marker_list) <- cell_types
+
+```
+
+### read Allen Brain Atlas data in the freesurfer space from figshare and fix first columns
+### https://figshare.com/articles/A_FreeSurfer_view_of_the_cortical_transcriptome_generated_from_the_Allen_Human_Brain_Atlas/1439749
+
+```{r}
+expression <- read_tsv("https://ndownloader.figshare.com/files/7013300")
+expression %<>% dplyr::rename(gene_symbol = X1)
+
+expression_region_metadata <- read_tsv("https://ndownloader.figshare.com/files/3342527")
+expression_region_metadata %<>% dplyr::rename(region_name = X1)
+```
+
+### Filter out genes with low expression
+
+```{r}
+
+expressionMatrix <- expression %>% select( Probe = gene_symbol, Gene.Symbol = gene_symbol,everything())
+
+medExp = expressionMatrix %>% 
+  sepExpr() %>% {.[[2]]} %>%
+  unlist %>% median
+expressionMatrix = mostVariable(expressionMatrix, threshold = medExp, threshFun=median)
+
+```
+
+### run MGP to get estimates
+
+```{r}
+estimations =  mgpEstimate(exprData=expressionMatrix,
+                           genes=marker_list,
+                           geneColName='Gene.Symbol',
+                           outlierSampleRemove=F, # should outlier samples removed. This is done using boxplot stats.
+                           geneTransform =NULL, #markers are human genes
+                           groups=NULL, #if there are experimental groups provide them here. if not desired set to NULL
+                           seekConsensus = FALSE, # ensures gene rotations are positive in both of the groups
+                           removeMinority = TRUE) # removes genes if they are the minority in terms of rotation sign from estimation process
+```
+
+```{r}
+mgp_estimates <- as.data.frame(estimations$estimates) %>% as_tibble(rownames = "region_name")
+mgp_estimates %<>% select(region_name, Inh_SST)
+colnames(mgp_estimates)
+mgp_df <- inner_join(expression_region_metadata, mgp_estimates, by = "region_name")
+
+```
+
+### Inspect SST proportions - low in occipital regions and high in frontal regions
+```{r}
+mgp_df %>% arrange(Inh_SST) %>% print() #acending
+mgp_df %>% arrange(-Inh_SST) %>% print() #descending
+```
+
+### Write out for future analyses
+
+```{r}
+dir.create(here("results", "Allen_SST_estimates"), recursive = T)
+mgp_df %>% write_csv(here("results", "Allen_SST_estimates", "Regional_SST_estimates.csv"))
+```
+
+## Optional Exercises
+
+* Visualize SST estimates using tksurfer from FreeSurfer (https://figshare.com/articles/A_FreeSurfer_view_of_the_cortical_transcriptome_generated_from_the_Allen_Human_Brain_Atlas/1439749)
+
+

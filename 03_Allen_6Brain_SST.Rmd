@@ -1,6 +1,16 @@
+---
+title: "Functional Genomics Part 3"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r}
 library(here)
 library(tidyverse)
 library(markerGeneProfile)
+```
 
 # Estimating inhibitory SST neuron proportions across the adult cerebral cortex using the Allen Human Brain Atlas using the aparc Freesurfer space (Desikan–Killiany cortical atlas)
 
@@ -26,10 +36,20 @@ names(marker_list) <- cell_types
 ### https://figshare.com/articles/A_FreeSurfer_view_of_the_cortical_transcriptome_generated_from_the_Allen_Human_Brain_Atlas/1439749
 
 ```{r}
-expression <- read_tsv("https://ndownloader.figshare.com/files/7013300")
+## reads the data from figshare if it has not been already downloaded
+
+if (file.exists(here("allen_brain", "expression.tsv"))) {
+  expression <- read_tsv(here("allen_brain", "expression.tsv"))
+  expression_region_metadata <- read_tsv(here("allen_brain", "expression_metadata.tsv"))
+} else {
+  expression <- read_tsv("https://ndownloader.figshare.com/files/7013300")
+  expression_region_metadata <- read_tsv("https://ndownloader.figshare.com/files/3342527")
+}
+
+## change one of the column names
 expression %<>% dplyr::rename(gene_symbol = X1)
 
-expression_region_metadata <- read_tsv("https://ndownloader.figshare.com/files/3342527")
+## fix one of the column names
 expression_region_metadata %<>% dplyr::rename(region_name = X1)
 ```
 
@@ -39,7 +59,7 @@ expression_region_metadata %<>% dplyr::rename(region_name = X1)
 
 expressionMatrix <- expression %>% select( Probe = gene_symbol, Gene.Symbol = gene_symbol,everything())
 
-medExp = expressionMatrix %>% 
+medExp = expressionMatrix %>%
   sepExpr() %>% {.[[2]]} %>%
   unlist %>% median
 expressionMatrix = mostVariable(expressionMatrix, threshold = medExp, threshFun=median)
@@ -83,5 +103,3 @@ mgp_df %>% write_csv(here("results", "Allen_SST_estimates", "Regional_SST_estima
 ## Optional Exercises
 
 * Visualize SST estimates using tksurfer from FreeSurfer (https://figshare.com/articles/A_FreeSurfer_view_of_the_cortical_transcriptome_generated_from_the_Allen_Human_Brain_Atlas/1439749)
-
-

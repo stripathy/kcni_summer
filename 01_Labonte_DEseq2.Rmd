@@ -16,8 +16,14 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
-## Installing R packages - this has already been done
+## DESeq2
 
+Here were are working with DESeq2 to identify differentally expressed genes. It performs several steps that are customized for the unique properties of RNA sequencing count data. This includes normalization for library size, shrinkage of variance, fold change estimation and uses the negative binomial distribution to test for differential expression. 
+Details about DESeq2 can be found at:
+https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-10-r106
+https://www.cs.colostate.edu/~asa/courses/rnaseq/fall17/lib/exe/fetch.php?media=171130_deseq2_slides.pdf
+
+## Installing R packages - this has already been done
 
 
 ```{r eval=FALSE}

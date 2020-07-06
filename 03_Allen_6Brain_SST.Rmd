@@ -49,6 +49,9 @@ if (file.exists(here("allen_brain", "expression.tsv"))) {
 ## change one of the column names
 expression %<>% dplyr::rename(gene_symbol = X1)
 
+#remove the column with donor correlation metric
+expression %<>% select(-`Average donor correlation to median`)
+
 ## fix one of the column names
 expression_region_metadata %<>% dplyr::rename(region_name = X1)
 ```
@@ -90,6 +93,8 @@ mgp_df <- inner_join(expression_region_metadata, mgp_estimates, by = "region_nam
 ### Inspect SST proportions - low in occipital regions and high in frontal regions
 ```{r}
 mgp_df %>% arrange(Inh_SST) %>% print() #acending
+```
+```{r}
 mgp_df %>% arrange(-Inh_SST) %>% print() #descending
 ```
 

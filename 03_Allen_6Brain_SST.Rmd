@@ -92,10 +92,10 @@ mgp_df <- inner_join(expression_region_metadata, mgp_estimates, by = "region_nam
 
 ### Inspect SST proportions - low in occipital regions and high in frontal regions
 ```{r}
-mgp_df %>% arrange(Inh_SST) %>% print() #acending
+mgp_df %>% arrange(Inh_SST) %>% select(FreeSurferShortName, Hemisphere, Inh_SST)  %>% print() #acending
 ```
 ```{r}
-mgp_df %>% arrange(-Inh_SST) %>% print() #descending
+mgp_df %>% arrange(-Inh_SST) %>% select(FreeSurferShortName, Hemisphere, Inh_SST) %>% print() #descending
 ```
 
 ### Write out for future analyses

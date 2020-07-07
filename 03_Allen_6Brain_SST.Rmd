@@ -115,8 +115,8 @@ mgp_df %>% write_csv(here("results", "Allen_SST_estimates", "Regional_SST_estima
 ```{r}
 mgp_df <- inner_join(mgp_df, read_csv(here("data","region_names_for_ggseg.csv")))
 mgp_df %<>% mutate(hemi = if_else(Hemisphere == "lh", "left", "right"))
-ggseg(mapping=aes(fill=Inh_SST), colour="black", .data = mgp_df %>% select(region, Inh_SST, hemi), atlas="dk") + 
-  scale_fill_gradient(low="firebrick",high="goldenrod") 
+ggseg(mapping=aes(fill=Inh_SST), colour="black", .data = mgp_df %>% select(region, Inh_SST, hemi), atlas="dk") 
+  #+scale_fill_gradient(low="firebrick",high="goldenrod") #alternate color scheme
 
 ```
 

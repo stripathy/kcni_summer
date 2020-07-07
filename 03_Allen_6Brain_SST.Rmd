@@ -10,6 +10,10 @@ output:
 library(here)
 library(tidyverse)
 library(markerGeneProfile)
+
+#install.packages("remotes")
+#remotes::install_github("LCBC-UiO/ggseg", build_vignettes = TRUE)
+library(ggseg)
 ```
 
 # Estimating inhibitory SST neuron proportions across the adult cerebral cortex using the Allen Human Brain Atlas using the aparc Freesurfer space (Desikan–Killiany cortical atlas)
@@ -40,7 +44,7 @@ names(marker_list) <- cell_types
 
 if (file.exists(here("allen_brain", "expression.tsv"))) {
   expression <- read_tsv(here("allen_brain", "expression.tsv"))
-  expression_region_metadata <- read_tsv(here("allen_brain", "expression_metadata.tsv"))
+  expression_region_metadata <- read_tsv(here("allen_brain", "expression_metadata.tsv")) 
 } else {
   expression <- read_tsv("https://ndownloader.figshare.com/files/7013300")
   expression_region_metadata <- read_tsv("https://ndownloader.figshare.com/files/3342527")
@@ -105,6 +109,15 @@ dir.create(here("results", "Allen_SST_estimates"), recursive = T)
 mgp_df %>% write_csv(here("results", "Allen_SST_estimates", "Regional_SST_estimates.csv"))
 ```
 
-## Optional Exercises
 
-* Visualize SST estimates using tksurfer from FreeSurfer (https://figshare.com/articles/A_FreeSurfer_view_of_the_cortical_transcriptome_generated_from_the_Allen_Human_Brain_Atlas/1439749)
+## ggseg visualization, requires specific naming scheme
+
+```{r}
+mgp_df <- inner_join(mgp_df, read_csv(here("data","region_names_for_ggseg.csv")))
+mgp_df %<>% mutate(hemi = if_else(Hemisphere == "lh", "left", "right"))
+ggseg(mapping=aes(fill=Inh_SST), colour="black", .data = mgp_df %>% select(region, Inh_SST, hemi), atlas="dk") + 
+  scale_fill_gradient(low="firebrick",high="goldenrod") 
+
+```
+
+

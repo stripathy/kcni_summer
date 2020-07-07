@@ -1,0 +1,69 @@
+region_name,region
+ctx-lh-bankssts,bankssts
+ctx-lh-caudalanteriorcingulate,caudal anterior cingulate
+ctx-lh-caudalmiddlefrontal,caudal middle frontal
+ctx-lh-cuneus,cuneus
+ctx-lh-entorhinal,entorhinal
+ctx-lh-fusiform,fusiform
+ctx-lh-inferiorparietal,inferior parietal
+ctx-lh-inferiortemporal,inferior temporal
+ctx-lh-isthmuscingulate,isthmus cingulate
+ctx-lh-lateraloccipital,lateral occipital
+ctx-lh-lateralorbitofrontal,lateral orbitofrontal
+ctx-lh-lingual,lingual
+ctx-lh-medialorbitofrontal,medial orbitofrontal
+ctx-lh-middletemporal,middle temporal
+ctx-lh-parahippocampal,parahippocampal
+ctx-lh-paracentral,paracentral
+ctx-lh-parsopercularis,pars opercularis
+ctx-lh-parsorbitalis,pars orbitalis
+ctx-lh-parstriangularis,pars triangularis
+ctx-lh-pericalcarine,pericalcarine
+ctx-lh-postcentral,postcentral
+ctx-lh-posteriorcingulate,posterior cingulate
+ctx-lh-precentral,precentral
+ctx-lh-precuneus,precuneus
+ctx-lh-rostralanteriorcingulate,rostral anterior cingulate
+ctx-lh-rostralmiddlefrontal,rostral middle frontal
+ctx-lh-superiorfrontal,superior frontal
+ctx-lh-superiorparietal,superior parietal
+ctx-lh-superiortemporal,superior temporal
+ctx-lh-supramarginal,supramarginal
+ctx-lh-frontalpole,frontal pole
+ctx-lh-temporalpole,temporal pole
+ctx-lh-transversetemporal,transverse temporal
+ctx-lh-insula,insula
+ctx-rh-bankssts,bankssts
+ctx-rh-caudalanteriorcingulate,caudal anterior cingulate
+ctx-rh-caudalmiddlefrontal,caudal middle frontal
+ctx-rh-cuneus,cuneus
+ctx-rh-entorhinal,entorhinal
+ctx-rh-fusiform,fusiform
+ctx-rh-inferiorparietal,inferior parietal
+ctx-rh-inferiortemporal,inferior temporal
+ctx-rh-isthmuscingulate,isthmus cingulate
+ctx-rh-lateraloccipital,lateral occipital
+ctx-rh-lateralorbitofrontal,lateral orbitofrontal
+ctx-rh-lingual,lingual
+ctx-rh-medialorbitofrontal,medial orbitofrontal
+ctx-rh-middletemporal,middle temporal
+ctx-rh-parahippocampal,parahippocampal
+ctx-rh-paracentral,paracentral
+ctx-rh-parsopercularis,pars opercularis
+ctx-rh-parsorbitalis,pars orbitalis
+ctx-rh-parstriangularis,pars triangularis
+ctx-rh-pericalcarine,pericalcarine
+ctx-rh-postcentral,postcentral
+ctx-rh-posteriorcingulate,posterior cingulate
+ctx-rh-precentral,precentral
+ctx-rh-precuneus,precuneus
+ctx-rh-rostralanteriorcingulate,rostral anterior cingulate
+ctx-rh-rostralmiddlefrontal,rostral middle frontal
+ctx-rh-superiorfrontal,superior frontal
+ctx-rh-superiorparietal,superior parietal
+ctx-rh-superiortemporal,superior temporal
+ctx-rh-supramarginal,supramarginal
+ctx-rh-frontalpole,frontal pole
+ctx-rh-temporalpole,temporal pole
+ctx-rh-transversetemporal,transverse temporal
+ctx-rh-insula,insula

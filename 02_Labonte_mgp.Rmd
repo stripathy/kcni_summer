@@ -10,9 +10,7 @@ output:
 
 In this tutorial, we will use a computational technique called Marker Gene Profiles to estimate how proportions of cell types in the brain change in conditions such as natural aging and in depression. The Marker Gene Profiles tool is an example of a cell type deconvolution algorithm, that attempts to decompose a bulk tissue gene expression sample into a list of cell types. 
 
-Cell type deconvolution requires two components:
-* A set of bulk tissue gene expression samples
-* A set of marker genes per cell type that you want to estimate (these are often derived from single-cell RNAseq data)
+Cell type deconvolution requires two components, first, a set of marker genes per cell type that you want to estimate (these are often derived from single-cell RNAseq data), and second,  set of bulk tissue gene expression samples.
 
 You can learn more about the Marker Gene Profiles tool by reading the [documentation](https://github.com/PavlidisLab/markerGeneProfile) and by reading [Mancarci et al, 2017](http://www.eneuro.org/content/4/6/ENEURO.0212-17.2017) that describes it in greater detail.
 The Marker Gene Profiles tool makes use of cell type specific marker genes that have been 

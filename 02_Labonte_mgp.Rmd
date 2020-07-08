@@ -1,9 +1,12 @@
 ---
 title: "Functional Genomics Part 2 : Estimating cell type changes in aging and depression"
+author: Shreejoy Tripathy
+date: July 7, 2020
 output:
-  html_document:
+  github_document:
+    html_preview: true
     toc: true
-    toc_depth: 2
+    toc_depth: 3
 ---
 
 # Estimating relative cell type proportion changes in bulk brain gene expression data

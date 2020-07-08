@@ -16,7 +16,6 @@ In this tutorial, we will use a computational technique called Marker Gene Profi
 Cell type deconvolution requires two components, first, a set of marker genes per cell type that you want to estimate (these are often derived from single-cell RNAseq data), and second,  set of bulk tissue gene expression samples.
 
 You can learn more about the Marker Gene Profiles tool by reading the [documentation](https://github.com/PavlidisLab/markerGeneProfile) and by reading [Mancarci et al, 2017](http://www.eneuro.org/content/4/6/ENEURO.0212-17.2017) that describes it in greater detail.
-The Marker Gene Profiles tool makes use of cell type specific marker genes that have been 
 
 ### preliminaries
 

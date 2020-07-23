@@ -22,8 +22,7 @@ You can learn more about the Marker Gene Profiles tool by reading the
 [documentation](https://github.com/PavlidisLab/markerGeneProfile) and by
 reading [Mancarci et
 al, 2017](http://www.eneuro.org/content/4/6/ENEURO.0212-17.2017) that
-describes it in greater detail. The Marker Gene Profiles tool makes use
-of cell type specific marker genes that have been
+describes it in greater detail.
 
 ### preliminaries
 
@@ -312,25 +311,34 @@ and Phenotype (control / depression status).
 The model form here is: `cell_type_prop ~ gender + ph + rin + pmi + age
 + phenotype`
 
+To fit many models with `broom` it’s useful to use `pivot_longer` to
+stack the data into one column - then `dpylr::group_by()` to “split” the
+stacked data..
+
 ``` r
-mod_df_list <- lapply(cell_types, function(cell_type_name){
-  curr_formula = paste0('scale(', cell_type_name, ') ~ gender + scale(ph) + scale(rin) + scale(pmi) + scale(age) + phenotype')
-  curr_mod = lm(curr_formula, data = labonte_meta_plus_mgps)
+mod_df_list <- labonte_meta_plus_mgps %>%
+  # pivot longer to stack the cell type columns into one column
+  pivot_longer(all_of(cell_types),
+               names_to = "cell_type",
+               values_to = "cell_type_prop") %>%
   
+  # group the stacked data by cell_type
+  group_by(cell_type) %>%
   
-  mod_df = tidy(curr_mod)
-  mod_df$cell_type = cell_type_name
-  return(mod_df)
+  # fit all the cell_type_prop data accorting to the model 
+  # using the broom package to tidy the results 
+  do(tidy(lm(scale(cell_type_prop) ~ gender + scale(ph) + scale(rin) + scale(pmi) + scale(age) + phenotype,  data = .))) %>%
   
-}) %>% bind_rows()
-mod_df_list = mod_df_list %>% select(cell_type, term, everything())
+  # unstack the data and adjust for multiple comparisons using the Benjamini-Hochberg method
+  ungroup() %>%
+  mutate(padj = p.adjust(`p.value`, method = 'BH')) %>%
 
-# also do an adjustment for multiple comparisons using the Benjamini-Hochberg method
-mod_df_list$padj <- p.adjust(mod_df_list$p.value, method = 'BH')
-
-# do minor formatting of data frame
-replace_terms <- c('Intercept', 'gender:Male', 'pH', 'RIN', 'PMI', 'age', 'disorder:MDD')
-mod_df_list$term <- plyr::mapvalues(mod_df_list$term, from = c(mod_df_list$term %>% unique), to = replace_terms)
+  # clean up the names the the term column
+  mutate(term = recode(term, 
+                       `(Intercept)` = "Intercept", 
+                       `genderMale` = "gender:Male",
+                       `phenotypeMDD` = "disorder:MDD",
+                       `scale(age)` = "age"))
 ```
 
 ### Print standardized beta coefficients for each cell type and the depression disease status
@@ -342,19 +350,19 @@ knitr::kable(mod_df_list %>% filter(term == 'disorder:MDD'))
 
 | cell\_type   | term         |    estimate | std.error |   statistic |   p.value |      padj |
 | :----------- | :----------- | ----------: | --------: | ----------: | --------: | --------: |
-| Inh\_LAMP5   | disorder:MDD | \-0.1850316 | 0.2512223 | \-0.7365253 | 0.4656047 | 0.6830462 |
-| VLMC\_CYP1B1 | disorder:MDD | \-0.2802607 | 0.2777750 | \-1.0089487 | 0.3189169 | 0.6449208 |
-| Oligo        | disorder:MDD |   0.1893715 | 0.2554373 |   0.7413621 | 0.4626994 | 0.6830462 |
-| Endo\_CLDN5  | disorder:MDD | \-0.1541532 | 0.2946617 | \-0.5231531 | 0.6036838 | 0.7737356 |
-| Inh\_PAX6    | disorder:MDD | \-0.2308515 | 0.2836545 | \-0.8138474 | 0.4204340 | 0.6830462 |
-| Micro\_C1QC  | disorder:MDD | \-0.1278428 | 0.2931898 | \-0.4360410 | 0.6650944 | 0.8106836 |
-| Peri\_MUSTN1 | disorder:MDD | \-0.2332056 | 0.2928345 | \-0.7963734 | 0.4304023 | 0.6830462 |
-| Inh\_VIP     | disorder:MDD | \-0.3639626 | 0.2561300 | \-1.4210074 | 0.1628761 | 0.4248359 |
 | Astro\_FGFR3 | disorder:MDD | \-0.2094883 | 0.2825966 | \-0.7412979 | 0.4627379 | 0.6830462 |
-| Pyramidal    | disorder:MDD | \-0.0954358 | 0.2849260 | \-0.3349495 | 0.7393708 | 0.8516803 |
-| OPC\_MYT1    | disorder:MDD | \-0.2346329 | 0.2752749 | \-0.8523585 | 0.3989669 | 0.6830462 |
+| Endo\_CLDN5  | disorder:MDD | \-0.1541532 | 0.2946617 | \-0.5231531 | 0.6036838 | 0.7737356 |
+| Inh\_LAMP5   | disorder:MDD | \-0.1850316 | 0.2512223 | \-0.7365253 | 0.4656047 | 0.6830462 |
+| Inh\_PAX6    | disorder:MDD | \-0.2308515 | 0.2836545 | \-0.8138474 | 0.4204340 | 0.6830462 |
 | Inh\_PVALB   | disorder:MDD | \-0.1927934 | 0.2206790 | \-0.8736374 | 0.3874042 | 0.6830462 |
 | Inh\_SST     | disorder:MDD | \-0.2520474 | 0.1981794 | \-1.2718140 | 0.2106062 | 0.4914144 |
+| Inh\_VIP     | disorder:MDD | \-0.3639626 | 0.2561300 | \-1.4210074 | 0.1628761 | 0.4248359 |
+| Micro\_C1QC  | disorder:MDD | \-0.1278428 | 0.2931898 | \-0.4360410 | 0.6650944 | 0.8106836 |
+| Oligo        | disorder:MDD |   0.1893715 | 0.2554373 |   0.7413621 | 0.4626994 | 0.6830462 |
+| OPC\_MYT1    | disorder:MDD | \-0.2346329 | 0.2752749 | \-0.8523585 | 0.3989669 | 0.6830462 |
+| Peri\_MUSTN1 | disorder:MDD | \-0.2332056 | 0.2928345 | \-0.7963734 | 0.4304023 | 0.6830462 |
+| Pyramidal    | disorder:MDD | \-0.0954358 | 0.2849260 | \-0.3349495 | 0.7393708 | 0.8516803 |
+| VLMC\_CYP1B1 | disorder:MDD | \-0.2802607 | 0.2777750 | \-1.0089487 | 0.3189169 | 0.6449208 |
 
 ### Print standardized beta coefficients for each cell type and sample age
 
@@ -365,19 +373,19 @@ knitr::kable(mod_df_list %>% filter(term == 'age'))
 
 | cell\_type   | term |    estimate | std.error |   statistic |   p.value |      padj |
 | :----------- | :--- | ----------: | --------: | ----------: | --------: | --------: |
-| Inh\_LAMP5   | age  | \-0.2979740 | 0.1354239 | \-2.2003066 | 0.0334764 | 0.1603344 |
-| VLMC\_CYP1B1 | age  |   0.1818673 | 0.1497373 |   1.2145756 | 0.2314771 | 0.5137663 |
-| Oligo        | age  |   0.5692241 | 0.1376960 |   4.1339193 | 0.0001718 | 0.0043663 |
-| Endo\_CLDN5  | age  |   0.3083098 | 0.1588403 |   1.9410052 | 0.0591534 | 0.2563313 |
-| Inh\_PAX6    | age  |   0.0203873 | 0.1529067 |   0.1333314 | 0.8945835 | 0.9504945 |
-| Micro\_C1QC  | age  |   0.0862264 | 0.1580469 |   0.5455746 | 0.5883146 | 0.7648089 |
-| Peri\_MUSTN1 | age  |   0.1337371 | 0.1578553 |   0.8472132 | 0.4017948 | 0.6830462 |
-| Inh\_VIP     | age  | \-0.5641812 | 0.1380694 | \-4.0862143 | 0.0001988 | 0.0043663 |
 | Astro\_FGFR3 | age  |   0.2635602 | 0.1523365 |   1.7301188 | 0.0911311 | 0.3455389 |
-| Pyramidal    | age  | \-0.4286104 | 0.1535922 | \-2.7905746 | 0.0079502 | 0.0516760 |
-| OPC\_MYT1    | age  | \-0.1264494 | 0.1483897 | \-0.8521444 | 0.3990843 | 0.6830462 |
+| Endo\_CLDN5  | age  |   0.3083098 | 0.1588403 |   1.9410052 | 0.0591534 | 0.2563313 |
+| Inh\_LAMP5   | age  | \-0.2979740 | 0.1354239 | \-2.2003066 | 0.0334764 | 0.1603344 |
+| Inh\_PAX6    | age  |   0.0203873 | 0.1529067 |   0.1333314 | 0.8945835 | 0.9504945 |
 | Inh\_PVALB   | age  | \-0.4961363 | 0.1189592 | \-4.1706422 | 0.0001535 | 0.0043663 |
 | Inh\_SST     | age  | \-0.5658757 | 0.1068306 | \-5.2969448 | 0.0000043 | 0.0003909 |
+| Inh\_VIP     | age  | \-0.5641812 | 0.1380694 | \-4.0862143 | 0.0001988 | 0.0043663 |
+| Micro\_C1QC  | age  |   0.0862264 | 0.1580469 |   0.5455746 | 0.5883146 | 0.7648089 |
+| Oligo        | age  |   0.5692241 | 0.1376960 |   4.1339193 | 0.0001718 | 0.0043663 |
+| OPC\_MYT1    | age  | \-0.1264494 | 0.1483897 | \-0.8521444 | 0.3990843 | 0.6830462 |
+| Peri\_MUSTN1 | age  |   0.1337371 | 0.1578553 |   0.8472132 | 0.4017948 | 0.6830462 |
+| Pyramidal    | age  | \-0.4286104 | 0.1535922 | \-2.7905746 | 0.0079502 | 0.0516760 |
+| VLMC\_CYP1B1 | age  |   0.1818673 | 0.1497373 |   1.2145756 | 0.2314771 | 0.5137663 |
 
 ### Make plots showing the effect of age and major depression on cell type proportions
 

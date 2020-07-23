@@ -216,26 +216,35 @@ We will use R's linear modeling function `lm` to fit a statistical model against
 
 The model form here is: `cell_type_prop ~ gender + ph + rin + pmi + age + phenotype`
 
+To fit many models with `broom` it's useful to use `pivot_longer` to stack the data into one column - then `dpylr::group_by()` to "split" the stacked data..
+
 ```{r}
-mod_df_list <- lapply(cell_types, function(cell_type_name){
-  curr_formula = paste0('scale(', cell_type_name, ') ~ gender + scale(ph) + scale(rin) + scale(pmi) + scale(age) + phenotype')
-  curr_mod = lm(curr_formula, data = labonte_meta_plus_mgps)
+mod_df_list <- labonte_meta_plus_mgps %>%
+  # pivot longer to stack the cell type columns into one column
+  pivot_longer(all_of(cell_types),
+               names_to = "cell_type",
+               values_to = "cell_type_prop") %>%
   
+  # group the stacked data by cell_type
+  group_by(cell_type) %>%
   
-  mod_df = tidy(curr_mod)
-  mod_df$cell_type = cell_type_name
-  return(mod_df)
+  # fit all the cell_type_prop data accorting to the model 
+  # using the broom package to tidy the results 
+  do(tidy(lm(scale(cell_type_prop) ~ gender + scale(ph) + scale(rin) + scale(pmi) + scale(age) + phenotype,  data = .))) %>%
   
-}) %>% bind_rows()
-mod_df_list = mod_df_list %>% select(cell_type, term, everything())
+  # unstack the data and adjust for multiple comparisons using the Benjamini-Hochberg method
+  ungroup() %>%
+  mutate(padj = p.adjust(`p.value`, method = 'BH')) %>%
 
-# also do an adjustment for multiple comparisons using the Benjamini-Hochberg method
-mod_df_list$padj <- p.adjust(mod_df_list$p.value, method = 'BH')
+  # clean up the names the the term column
+  mutate(term = recode(term, 
+                       `(Intercept)` = "Intercept", 
+                       `genderMale` = "gender:Male",
+                       `phenotypeMDD` = "disorder:MDD",
+                       `scale(age)` = "age"))
 
-# do minor formatting of data frame
-replace_terms <- c('Intercept', 'gender:Male', 'pH', 'RIN', 'PMI', 'age', 'disorder:MDD')
-mod_df_list$term <- plyr::mapvalues(mod_df_list$term, from = c(mod_df_list$term %>% unique), to = replace_terms)
-```  
+```
+
 
 
 ### Print standardized beta coefficients for each cell type and the depression disease status 
